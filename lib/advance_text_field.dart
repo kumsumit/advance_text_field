@@ -4,19 +4,19 @@ import 'package:flutter/material.dart';
 
 class AdvanceTextField extends StatefulWidget {
   /// The widget's [width] and [height].
-  final double width, height;
+  final double? width, height;
 
   /// The widget's [backgroundColor] and [color].
   /// Colors of [textColor] and [textHintColor]
   final Color backgroundColor, color, textColor, textHintColor;
 
   /// Style of text hint[textHintStyle] and text[textStyle].
-  final TextStyle textHintStyle, textStyle;
+  final TextStyle? textHintStyle, textStyle;
 
   /// Type of AdvanceTextField with two option:
   /// [AdvanceTextFieldType.EDIT],
   /// [AdvanceTextFieldType.EDIT] for initial state.
-  final AdvanceTextFieldType type;
+  final AdvanceTextFieldType? type;
 
   /// a widget will using for Edit Button. it can be any Flutter [Widget]s.
   final Widget editLabel;
@@ -25,43 +25,43 @@ class AdvanceTextField extends StatefulWidget {
   final Widget saveLabel;
 
   /// an instance of [Duration] for Duration of animations.
-  final Duration animationDuration;
+  final Duration? animationDuration;
 
   /// Keyboard type of [AdvanceTextField].
-  final TextInputType keyboardType;
+  final TextInputType? keyboardType;
 
   /// Text hint and text of [AdvanceTextField].
-  final String textHint, text;
+  final String? textHint, text;
 
   /// Text editing controller.
-  final TextEditingController controller;
+  final TextEditingController? controller;
 
   /// Call when tap on [editLabel].
-  final Function onEditTap;
+  final Function? onEditTap;
 
   /// Call when tap on [saveLabel].
-  final Function(String text) onSaveTap;
+  final Function(String text)? onSaveTap;
 
   const AdvanceTextField(
       {Key? key,
-        required this.width,
+        this.width,
         this.height = 60.0,
         this.backgroundColor = Colors.blueAccent,
         this.textColor = Colors.black87,
         this.textHintColor = Colors.grey,
         this.color = Colors.white,
-        required this.type,
-        this.animationDuration = const  Duration(milliseconds: 500),
+        this.type,
+        this.animationDuration,
         required this.editLabel,
         required this.saveLabel,
         this.keyboardType = TextInputType.text,
-        required this.textHint,
-        required this.text,
-        required this.onEditTap,
-        required this.onSaveTap,
-        required this.controller,
-        this.textHintStyle = const TextStyle(color: Colors.grey),
-        this.textStyle = const TextStyle(color: Colors.black87)})
+        this.textHint,
+        this.text,
+        this.onEditTap,
+        this.onSaveTap,
+        this.controller,
+        this.textHintStyle,
+        this.textStyle})
       : super(key: key);
 
   @override
@@ -74,40 +74,40 @@ class _AdvanceTextFieldState extends State<AdvanceTextField> {
 
   TextEditingController _editingController = TextEditingController();
 
-  AdvanceTextFieldType _type = AdvanceTextFieldType.EDIT;
+  AdvanceTextFieldType? _type;
 
   /// Use when border should be fully rounded(circular).
   final _roundedCorner = 10000.0;
 
   /// Radius's of [AnimatedContainer] corners.
-  double _topRightRadius = 10000.0;
-  double _topLeftRadius =10000.0;
-  double _bottomLeftRadius = 10000.0;
-  double _bottomRightRadius = 10000.0;
+  double? _topRightRadius;
+  double? _topLeftRadius;
+  double? _bottomLeftRadius;
+  double? _bottomRightRadius;
 
   /// Width of [AnimatedContainer].
-  double _innerContainerWidth=10.0;
+  double? _innerContainerWidth;
 
   /// Width of widget container.
-  double _widgetWidth=20.0;
+  double? _widgetWidth;
 
-  bool _enable =false;
+  bool? _enable;
 
   MainAxisAlignment _mainAxisAlignment = MainAxisAlignment.center;
 
   @override
   void initState() {
     WidgetsBinding.instance!.addPostFrameCallback((_) {
-      _make(widget.type);
-      _editingController.text = widget.text;
+      _make(widget.type!);
+      _editingController.text = widget.text!;
     });
-    _editingController = widget.controller;
+    if (widget.controller != null) _editingController = widget.controller!;
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    _widgetWidth = widget.width ;
+    _widgetWidth = widget.width ?? MediaQuery.of(context).size.width * .8;
     return SizedBox(
       width: _widgetWidth,
       height: widget.height,
@@ -128,24 +128,28 @@ class _AdvanceTextFieldState extends State<AdvanceTextField> {
                 children: [
                   AnimatedContainer(
                     onEnd: () {
-                      _make(_type);
+                      _make(_type!);
                     },
                     margin: const EdgeInsets.all(2.0),
-                    width: widget.width - 4,
+                    width: _innerContainerWidth != null
+                        ? _innerContainerWidth
+                        : widget.width != null
+                        ? widget.width! - 4
+                        : (MediaQuery.of(context).size.width * .8) - 4,
                     height: widget.height,
                     duration:
-                    widget.animationDuration,
+                    widget.animationDuration ?? const Duration(milliseconds: 500),
                     decoration: BoxDecoration(
                       color: widget.color,
                       borderRadius: BorderRadius.only(
                           bottomLeft:
-                          Radius.circular(_bottomLeftRadius),
+                          Radius.circular(_bottomLeftRadius ?? _roundedCorner),
                           bottomRight:
-                          Radius.circular(_bottomRightRadius),
+                          Radius.circular(_bottomRightRadius ?? _roundedCorner),
                           topLeft:
-                          Radius.circular(_topLeftRadius),
+                          Radius.circular(_topLeftRadius ?? _roundedCorner),
                           topRight:
-                          Radius.circular(_topRightRadius)),
+                          Radius.circular(_topRightRadius ?? _roundedCorner)),
                     ),
                     child: Center(
                       child: TextField(
@@ -156,12 +160,12 @@ class _AdvanceTextFieldState extends State<AdvanceTextField> {
                         enabled: _enable,
                         onChanged: (value) {},
                         style:
-                        widget.textStyle ,
+                        widget.textStyle ?? TextStyle(color: widget.textColor),
                         decoration: InputDecoration(
                             border: InputBorder.none,
                             hintText: widget.textHint,
-                            hintStyle: widget.textHintStyle
-                                ),
+                            hintStyle: widget.textHintStyle ??
+                                TextStyle(color: widget.textHintColor)),
                       ),
                     ),
                   ),
@@ -180,7 +184,7 @@ class _AdvanceTextFieldState extends State<AdvanceTextField> {
       if (type == AdvanceTextFieldType.EDIT) {
         _leftWidget = _editWidget();
         _mainAxisAlignment = MainAxisAlignment.end;
-        _innerContainerWidth = _widgetWidth - 55;
+        _innerContainerWidth = _widgetWidth! - 55;
         _topLeftRadius = 0.0;
         _bottomLeftRadius = _roundedCorner;
         _topRightRadius = _roundedCorner;
@@ -190,7 +194,7 @@ class _AdvanceTextFieldState extends State<AdvanceTextField> {
       if (type == AdvanceTextFieldType.SAVE) {
         _rightWidget = _saveWidget();
         _mainAxisAlignment = MainAxisAlignment.start;
-        _innerContainerWidth = _widgetWidth - 55;
+        _innerContainerWidth = (_widgetWidth! - 55);
         _topLeftRadius = _roundedCorner;
         _bottomLeftRadius = _roundedCorner;
         _topRightRadius = 0.0;
@@ -203,7 +207,7 @@ class _AdvanceTextFieldState extends State<AdvanceTextField> {
   /// Inner Container fill when change type of widget.
   fill() {
     setState(() {
-      _innerContainerWidth = _widgetWidth - 4;
+      _innerContainerWidth = (_widgetWidth! - 4);
       _topLeftRadius = _roundedCorner;
       _bottomLeftRadius = _roundedCorner;
       _topRightRadius = _roundedCorner;
@@ -217,7 +221,7 @@ class _AdvanceTextFieldState extends State<AdvanceTextField> {
       onTap: () {
         _type = AdvanceTextFieldType.EDIT;
         fill();
-        widget.onSaveTap(_editingController.text);
+        if (widget.onSaveTap != null) widget.onSaveTap!(_editingController.text);
       },
       splashColor: Colors.transparent,
       highlightColor: Colors.transparent,
@@ -239,7 +243,7 @@ class _AdvanceTextFieldState extends State<AdvanceTextField> {
       onTap: () {
         _type = AdvanceTextFieldType.SAVE;
         fill();
-      widget.onEditTap();
+        if (widget.onEditTap != null) widget.onEditTap!();
       },
       splashColor: Colors.transparent,
       highlightColor: Colors.transparent,
